@@ -2975,11 +2975,344 @@ body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-
         </div>
       </div>
 
+      <!-- FIND THE DOSA -->
+      <div onclick="showPage('page-dosa')"
+      style="background:linear-gradient(135deg,#2d1a00,#1a0a2e);
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(255,180,0,0.25);
+      cursor:pointer;
+      position:relative;
+      min-height:160px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      transition:all 0.3s;"
+      onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(255,180,0,0.3)'"
+      onmouseout="this.style.transform='';this.style.boxShadow=''">
+        <div style="font-size:52px;">🫕</div>
+        <div style="color:white;font-weight:800;font-size:14px;font-family:'Orbitron',sans-serif;">FIND THE DOSA</div>
+        <div style="color:#fbbf24;font-size:10px;font-weight:600;letter-spacing:1px;">SHUFFLE · PICK · WIN</div>
+      </div>
+
     </div>
 
   </div>
 
 </div>
+
+<!-- ══════════════════ FIND THE DOSA PAGE ══════════════════ -->
+<div class="page" id="page-dosa" style="display:none;position:fixed;inset:0;z-index:200;overflow:hidden;">
+
+  <!-- Game Background -->
+  <div style="position:absolute;inset:0;background:url('https://muniyax.online/bg.png') center center/cover no-repeat;"></div>
+
+  <!-- Back button -->
+  <div onclick="goCasino2();setBnav('casino2')"
+    style="position:absolute;top:14px;left:14px;z-index:10;width:40px;height:40px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.2);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:20px;">&#8592;</div>
+
+  <!-- Balance top right -->
+  <div style="position:absolute;top:14px;right:14px;z-index:10;background:rgba(0,0,0,0.6);border:1px solid rgba(255,215,0,0.4);border-radius:20px;padding:6px 14px;display:flex;align-items:center;gap:6px;">
+    <span style="font-size:16px;">🪙</span>
+    <span id="dosa-bal-disp" style="color:#FFD700;font-weight:700;font-size:15px;">0</span>
+  </div>
+
+  <!-- Title boards -->
+  <div style="position:absolute;top:60px;left:50%;transform:translateX(-50%);width:90%;max-width:600px;display:flex;justify-content:space-between;align-items:flex-start;z-index:5;pointer-events:none;">
+    <!-- Left board: Find the Dosa -->
+    <div style="background:rgba(0,0,0,0.75);border:3px solid #ff69b4;border-radius:14px;padding:12px 16px;box-shadow:0 0 20px rgba(255,105,180,0.5),inset 0 0 20px rgba(0,0,0,0.5);min-width:140px;">
+      <div style="color:#FFD700;font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;text-align:center;text-shadow:0 0 10px #FFD700;">FIND THE</div>
+      <div style="color:#FFD700;font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;text-align:center;text-shadow:0 0 15px #FFD700;">DOSA</div>
+      <img src="https://i.imgur.com/placeholder.png" id="dosa-title-img" style="width:100px;height:70px;object-fit:contain;display:block;margin:6px auto 0;" onerror="this.style.display='none'">
+      <div style="font-size:40px;text-align:center;display:none;" id="dosa-fallback-emoji">🫓</div>
+    </div>
+    <!-- Right board: Choose the right pan -->
+    <div style="background:rgba(0,0,0,0.75);border:3px solid #8b5cf6;border-radius:14px;padding:12px 16px;box-shadow:0 0 20px rgba(139,92,246,0.5),inset 0 0 20px rgba(0,0,0,0.5);min-width:130px;">
+      <div style="color:#FFD700;font-family:'Orbitron',sans-serif;font-size:14px;font-weight:900;text-align:center;line-height:1.4;text-shadow:0 0 10px #FFD700;">CHOOSE<br>THE<br>RIGHT<br>PAN</div>
+    </div>
+  </div>
+
+  <!-- Pink table -->
+  <div style="position:absolute;bottom:140px;left:50%;transform:translateX(-50%);width:88%;max-width:600px;height:160px;background:linear-gradient(180deg,#e91e8c,#c2185b);border-radius:50% 50% 20px 20px / 30px 30px 20px 20px;border:3px solid #FFD700;box-shadow:0 8px 30px rgba(233,30,140,0.4);z-index:3;">
+    <div style="position:absolute;inset:4px;background:radial-gradient(ellipse at center,rgba(255,105,180,0.3),transparent);border-radius:inherit;"></div>
+    <!-- Heart pattern -->
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-around;padding:0 30px;opacity:0.2;font-size:18px;">
+      <span>♥</span><span>♥</span><span>♥</span><span>♥</span><span>♥</span>
+    </div>
+  </div>
+
+  <!-- Pans container -->
+  <div id="dosa-pans-container" style="position:absolute;bottom:160px;left:50%;transform:translateX(-50%);width:86%;max-width:560px;display:flex;justify-content:space-around;align-items:flex-end;z-index:5;gap:10px;"></div>
+
+  <!-- Status message -->
+  <div id="dosa-msg" style="position:absolute;bottom:130px;left:50%;transform:translateX(-50%);color:white;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;text-align:center;letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,0.8);white-space:nowrap;z-index:6;">TAP A PAN TO BEGIN</div>
+
+  <!-- Bottom UI -->
+  <div style="position:absolute;bottom:0;left:0;right:0;height:130px;background:rgba(0,0,0,0.7);border-top:1px solid rgba(255,215,0,0.2);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:10;gap:10px;">
+
+    <!-- Score -->
+    <div style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,215,0,0.3);border-radius:14px;padding:10px 14px;">
+      <span style="font-size:22px;">🏆</span>
+      <div>
+        <div style="color:rgba(255,255,255,0.5);font-size:9px;letter-spacing:1px;">SCORE</div>
+        <div id="dosa-score" style="color:#FFD700;font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;">0</div>
+      </div>
+    </div>
+
+    <!-- Bet controls -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+      <div style="color:rgba(255,255,255,0.5);font-size:9px;letter-spacing:2px;text-transform:uppercase;">BET AMOUNT</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button onclick="dosaBetChange(-1)" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#5b21b6);border:none;color:white;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+        <div style="background:rgba(0,0,0,0.6);border:2px solid rgba(139,92,246,0.5);border-radius:12px;padding:6px 20px;min-width:90px;text-align:center;">
+          <div id="dosa-bet-disp" style="color:white;font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;">100</div>
+        </div>
+        <button onclick="dosaBetChange(1)" style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#5b21b6);border:none;color:white;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+      </div>
+    </div>
+
+    <!-- Rules & Exit -->
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button onclick="dosaShowRules()" style="background:linear-gradient(135deg,#1d4ed8,#2563eb);border:none;color:white;font-family:'Exo 2',sans-serif;font-weight:700;font-size:12px;padding:8px 14px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:6px;">❓ RULES</button>
+      <button onclick="goCasino2();setBnav('casino2')" style="background:linear-gradient(135deg,#dc2626,#b91c1c);border:none;color:white;font-family:'Exo 2',sans-serif;font-weight:700;font-size:12px;padding:8px 14px;border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:6px;">⏹ EXIT</button>
+    </div>
+
+  </div>
+
+  <!-- Result overlay -->
+  <div id="dosa-result-overlay" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,0.7);z-index:20;display:none;align-items:center;justify-content:center;">
+    <div id="dosa-result-box" style="background:linear-gradient(135deg,#1a0a2e,#2d0a4e);border-radius:24px;padding:32px;text-align:center;border:2px solid #FFD700;box-shadow:0 20px 60px rgba(0,0,0,0.8);max-width:300px;width:85%;animation:popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);">
+      <div id="dosa-result-emoji" style="font-size:60px;margin-bottom:10px;"></div>
+      <div id="dosa-result-title" style="font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;margin-bottom:8px;"></div>
+      <div id="dosa-result-amt" style="font-size:15px;color:rgba(255,255,255,0.7);margin-bottom:20px;"></div>
+      <button onclick="dosaNextRound()" style="background:linear-gradient(135deg,#7c3aed,#ec4899);border:none;color:white;font-family:'Orbitron',sans-serif;font-weight:700;font-size:14px;padding:12px 32px;border-radius:12px;cursor:pointer;letter-spacing:1px;">PLAY AGAIN</button>
+    </div>
+  </div>
+
+</div>
+
+<style>
+.dosa-pan {
+  width: 110px;
+  height: 110px;
+  cursor: pointer;
+  transition: transform 0.15s;
+  position: relative;
+  flex-shrink: 0;
+}
+.dosa-pan:hover:not(.no-hover) {
+  transform: translateY(-8px) scale(1.05);
+}
+.dosa-pan-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.6));
+}
+.dosa-pan-emoji {
+  font-size: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.6));
+}
+@keyframes panShake {
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-8px);}
+  40%{transform:translateX(8px);}
+  60%{transform:translateX(-5px);}
+  80%{transform:translateX(5px);}
+}
+@keyframes panWin {
+  0%{transform:scale(1);}
+  50%{transform:scale(1.2) rotate(5deg);}
+  100%{transform:scale(1);}
+}
+</style>
+
+<script>
+// ═══ FIND THE DOSA GAME ═══
+let dosaBet = 100;
+const dosaBetOptions = [10,50,100,500,1000,5000];
+let dosaBetIdx = 2;
+let dosaWinPan = -1;
+let dosaPanPositions = [0,1,2]; // tracks where each pan is
+let dosaGameActive = false;
+let dosaScore = 0;
+let dosaRound = 0;
+
+function dosaInit() {
+  dosaBet = dosaBetOptions[dosaBetIdx];
+  dosaUpdateBetDisp();
+  dosaUpdateBalDisp();
+  dosaScore = 0;
+  dosaRound = 0;
+  document.getElementById('dosa-score').textContent = '0';
+  dosaBuildPans();
+  dosaSetMsg('TAP A PAN TO BEGIN');
+  document.getElementById('dosa-result-overlay').style.display = 'none';
+}
+
+function dosaUpdateBalDisp() {
+  const el = document.getElementById('dosa-bal-disp');
+  if(el) el.textContent = fmtCurr ? fmtCurr(bal).replace(CURR.symbol,'') : Math.floor(bal);
+}
+
+function dosaUpdateBetDisp() {
+  const el = document.getElementById('dosa-bet-disp');
+  if(el) el.textContent = dosaBetOptions[dosaBetIdx];
+  dosaBet = dosaBetOptions[dosaBetIdx];
+}
+
+function dosaBetChange(dir) {
+  dosaBetIdx = Math.max(0, Math.min(dosaBetOptions.length-1, dosaBetIdx+dir));
+  dosaUpdateBetDisp();
+}
+
+function dosaBuildPans() {
+  const container = document.getElementById('dosa-pans-container');
+  container.innerHTML = '';
+  dosaPanPositions = [0,1,2];
+  dosaWinPan = Math.floor(Math.random()*3);
+  dosaGameActive = true;
+
+  for(let i=0;i<3;i++){
+    const pan = document.createElement('div');
+    pan.className = 'dosa-pan';
+    pan.id = 'dosa-pan-'+i;
+    pan.dataset.idx = i;
+    pan.innerHTML = `<img src="https://muniyax.online/pan.png" class="dosa-pan-img" style="width:340px;height:120px;object-fit:cover;object-position:${i===0?'0%':i===1?'50%':'100%'} center;clip-path:inset(0 ${i===0?'66%':i===1?'33%':'0%'} 0 ${i===0?'0%':i===1?'33%':'66%'});">`;
+    pan.onclick = () => dosaPickPan(i);
+    container.appendChild(pan);
+  }
+}
+
+function dosaPickPan(idx) {
+  if(!dosaGameActive) return;
+  if(bal < dosaBet){ toast('Insufficient balance!','error'); return; }
+
+  dosaGameActive = false;
+  dosaRound++;
+
+  // Deduct bet
+  bal -= dosaBet;
+  updateBalance(bal);
+  dosaUpdateBalDisp();
+
+  // Reveal all pans
+  for(let i=0;i<3;i++){
+    const pan = document.getElementById('dosa-pan-'+i);
+    if(pan) {
+      pan.classList.add('no-hover');
+      if(i === dosaWinPan){
+        pan.innerHTML = `<img src="https://muniyax.online/dosa.png" style="width:120px;height:100px;object-fit:contain;filter:drop-shadow(0 0 20px rgba(0,230,118,0.8));">`;
+        pan.style.filter = 'drop-shadow(0 0 20px rgba(0,230,118,0.8))';
+      } else {
+        pan.innerHTML = `<div class="dosa-pan-emoji">❌</div>`;
+        pan.style.opacity = '0.5';
+      }
+    }
+  }
+
+  const won = (idx === dosaWinPan);
+
+  if(won){
+    const winAmt = dosaBet * 2;
+    bal += winAmt;
+    updateBalance(bal);
+    dosaUpdateBalDisp();
+    dosaScore += winAmt;
+    document.getElementById('dosa-score').textContent = dosaScore;
+    dosaSetMsg('🎉 CORRECT PAN! YOU WIN!');
+    const pan = document.getElementById('dosa-pan-'+idx);
+    if(pan) pan.style.animation = 'panWin 0.5s ease';
+    setTimeout(()=>dosaShowResult(true, winAmt), 800);
+  } else {
+    dosaSetMsg('😢 WRONG PAN! TRY AGAIN!');
+    setTimeout(()=>dosaShowResult(false, dosaBet), 800);
+  }
+}
+
+function dosaShowResult(won, amt) {
+  const overlay = document.getElementById('dosa-result-overlay');
+  document.getElementById('dosa-result-emoji').textContent = won ? '🎉' : '😢';
+  document.getElementById('dosa-result-title').textContent = won ? 'YOU WIN!' : 'WRONG PAN!';
+  document.getElementById('dosa-result-title').style.color = won ? '#00e676' : '#ff1744';
+  document.getElementById('dosa-result-amt').textContent = won
+    ? `+${fmtCurr ? fmtCurr(amt) : '₹'+amt} added to balance`
+    : `-${fmtCurr ? fmtCurr(amt) : '₹'+amt} deducted`;
+  overlay.style.display = 'flex';
+}
+
+function dosaNextRound() {
+  document.getElementById('dosa-result-overlay').style.display = 'none';
+  dosaBuildPans();
+  dosaSetMsg('PICK A PAN — DOSA IS HIDING!');
+  // Brief shuffle animation
+  dosaShuffle(3 + dosaRound);
+}
+
+function dosaShuffle(times) {
+  if(times <= 0){ dosaSetMsg('NOW CHOOSE A PAN!'); dosaGameActive = true; return; }
+  const pans = document.getElementById('dosa-pans-container');
+  const children = [...pans.children];
+
+  // Swap 2 random pans
+  const a = Math.floor(Math.random()*3);
+  let b = Math.floor(Math.random()*3);
+  while(b===a) b = Math.floor(Math.random()*3);
+
+  const aEl = children[a];
+  const bEl = children[b];
+
+  // Animate swap
+  const aRect = aEl.getBoundingClientRect();
+  const bRect = bEl.getBoundingClientRect();
+  const dx = bRect.left - aRect.left;
+
+  aEl.style.transition = 'transform 0.3s ease';
+  bEl.style.transition = 'transform 0.3s ease';
+  aEl.style.transform = `translateX(${dx}px)`;
+  bEl.style.transform = `translateX(${-dx}px)`;
+
+  // Also track dosaWinPan position
+  if(a === dosaWinPan) dosaWinPan = b;
+  else if(b === dosaWinPan) dosaWinPan = a;
+
+  setTimeout(()=>{
+    aEl.style.transition = '';
+    bEl.style.transition = '';
+    aEl.style.transform = '';
+    bEl.style.transform = '';
+
+    // Physically reorder in DOM
+    if(a < b){
+      pans.insertBefore(bEl, aEl);
+    } else {
+      pans.insertBefore(aEl, bEl.nextSibling);
+    }
+
+    const speed = Math.max(200, 400 - (dosaRound * 20));
+    setTimeout(()=>dosaShuffle(times-1), speed);
+  }, 300);
+}
+
+function dosaSetMsg(msg) {
+  const el = document.getElementById('dosa-msg');
+  if(el) el.textContent = msg;
+}
+
+function dosaShowRules() {
+  toast('Pick the pan hiding the dosa! Win 2x your bet. Each round shuffles faster!', 'info');
+}
+
+// Init when page shown
+const _origShowPage = typeof showPage === 'function' ? showPage : null;
+</script>
 
 <!-- ══════════════════ HEAD & TAILS PAGE ══════════════════ -->
 <div class="page" id="page-headtails" style="display:none;background:#07070f;min-height:100vh;">
@@ -9721,6 +10054,10 @@ var selectedPage = document.getElementById(pageId);
 
 if(selectedPage){
 selectedPage.style.display = 'block';
+}
+
+if(pageId === 'page-dosa') {
+  setTimeout(function(){ dosaInit(); dosaShuffle(3); }, 100);
 }
 
 window.scrollTo(0,0);
