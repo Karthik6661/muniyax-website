@@ -345,6 +345,36 @@ body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-
 @keyframes brev{0%{transform:scale(1);}50%{transform:scale(1.3);}100%{transform:scale(1);}}
 .mmult{font-family:'Orbitron',sans-serif;font-size:36px;font-weight:700;color:var(--green);text-shadow:0 0 20px var(--green);margin:8px 0;}
 
+
+/* MINES EXTRA */
+.m-bomb-chips{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:10px;}
+.m-bchip{padding:5px 2px;border-radius:7px;border:1.5px solid rgba(124,58,237,0.3);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.15s;}
+.m-bchip:hover{border-color:var(--purple2);color:white;}
+.m-bchip.on{background:linear-gradient(135deg,var(--purple),var(--purple2));border-color:var(--purple);color:white;}
+.m-bchip.bomb-on{background:linear-gradient(135deg,#7f1d1d,#dc2626);border-color:#dc2626;color:white;}
+
+.m-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);margin-bottom:8px;}
+.m-toggle-label{font-size:12px;color:var(--text2);font-weight:600;}
+.m-toggle{position:relative;width:38px;height:20px;cursor:pointer;}
+.m-toggle input{opacity:0;width:0;height:0;}
+.m-tslider{position:absolute;inset:0;background:#333;border-radius:20px;transition:0.3s;}
+.m-tslider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:white;border-radius:50%;transition:0.3s;}
+.m-toggle input:checked + .m-tslider{background:var(--purple);}
+.m-toggle input:checked + .m-tslider:before{transform:translateX(18px);}
+
+.m-action-row{display:flex;gap:6px;margin-bottom:6px;}
+.m-action-row .abtn{flex:1;margin-top:0;font-size:12px;padding:9px 4px;}
+
+.m-safepath-cells{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.m-sp-cell{width:32px;height:32px;border-radius:7px;border:1.5px dashed rgba(124,58,237,0.5);background:var(--bg3);color:var(--text3);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.m-sp-cell.picked{border-color:var(--cyan);background:rgba(0,229,255,0.15);color:var(--cyan);}
+
+.m-martingale-info{font-size:11px;color:var(--gold);text-align:center;padding:4px;display:none;}
+.m-martingale-info.show{display:block;}
+
+@keyframes screenShake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+@keyframes bombExplode{0%{transform:scale(1);filter:brightness(1);}30%{transform:scale(1.4);filter:brightness(3) saturate(2);}100%{transform:scale(1);filter:brightness(1);}}
+
 /* ROULETTE */
 #rcv{border-radius:50%;box-shadow:0 0 40px rgba(124,58,237,0.5),0 0 80px rgba(224,64,251,0.2);cursor:pointer;}
 .rnum{font-family:'Orbitron',sans-serif;font-size:40px;font-weight:900;margin:12px 0;min-height:56px;display:flex;align-items:center;justify-content:center;}
@@ -1551,24 +1581,40 @@ body{background:var(--bg);color:var(--text);font-family:'Exo 2',sans-serif;font-
             <select class="csel" id="mbs"><option value="10">₹ 10</option><option value="50">₹ 50</option><option value="100" selected>₹ 100</option><option value="500">₹ 500</option><option value="1000">₹ 1,000</option></select>
             <div class="chips"><button class="chip" onclick="smb(10)">10</button><button class="chip" onclick="smb(50)">50</button><button class="chip on" onclick="smb(100)">100</button><button class="chip" onclick="smb(500)">500</button><button class="chip" onclick="smb(1000)">1K</button></div>
             <div class="clabel">Mines Count</div>
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-              <button style="width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:white;font-size:20px;cursor:pointer;flex-shrink:0" onclick="cmc(-1)">−</button>
-              <div style="flex:1;text-align:center;font-size:22px;font-weight:700" id="mcd">3</div>
-              <button style="width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:white;font-size:20px;cursor:pointer;flex-shrink:0" onclick="cmc(1)">+</button>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:6px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)">
+            <div class="m-bomb-chips" id="mBombChips"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:6px 10px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)">
               <span style="font-size:12px;color:var(--text3);font-weight:600;letter-spacing:1px;">💣 BOMBS</span>
               <span style="font-size:14px;color:var(--red);font-weight:700" id="mBombCount">3</span>
               <span style="font-size:12px;color:var(--text3);">|</span>
               <span style="font-size:12px;color:var(--text3);font-weight:600;letter-spacing:1px;">💎 GEMS</span>
               <span style="font-size:14px;color:var(--green);font-weight:700" id="mGemCount">22</span>
             </div>
-            <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:14px">
+            <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-bottom:10px">
               <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span style="color:var(--text3)">Multiplier</span><span style="color:var(--green);font-weight:700" id="mmd">1.48x</span></div>
               <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:var(--text3)">Payout</span><span style="color:var(--gold);font-weight:700" id="mpd">₹148</span></div>
             </div>
+            <!-- Martingale toggle -->
+            <div class="m-toggle-row">
+              <span class="m-toggle-label">🎲 Martingale Mode</span>
+              <label class="m-toggle"><input type="checkbox" id="mMartToggle" onchange="mMartChange()"><span class="m-tslider"></span></label>
+            </div>
+            <div class="m-martingale-info" id="mMartInfo">Next bet: <span id="mMartNextBet">₹100</span> (2× on loss)</div>
+            <!-- Safe Path toggle -->
+            <div class="m-toggle-row">
+              <span class="m-toggle-label">🛤️ Safe Path Mode</span>
+              <label class="m-toggle"><input type="checkbox" id="mSafeToggle" onchange="mSafeChange()"><span class="m-tslider"></span></label>
+            </div>
+            <div id="mSafePathUI" style="display:none;margin-bottom:8px;">
+              <div style="font-size:11px;color:var(--text3);margin-bottom:5px;">Pick up to 5 cells to auto-reveal:</div>
+              <div class="m-safepath-cells" id="mSafePathCells"></div>
+              <div style="font-size:11px;color:var(--cyan);text-align:center;" id="mSafePickCount">0 / 5 selected</div>
+            </div>
+            <!-- Action buttons -->
             <button class="abtn ag" id="mCashBtn" onclick="mco()" style="display:none;" disabled>💰 CASH OUT</button>
-            <button class="abtn ao" id="mStartBtn" onclick="initMines()" style="margin-top:6px">🚀 START GAME</button>
+            <div class="m-action-row" id="mActionRow">
+              <button class="abtn ao" id="mStartBtn" onclick="initMines()">🚀 START</button>
+              <button class="abtn" id="mAutoBtn" onclick="mAutoPick()" style="background:linear-gradient(135deg,#0e7490,#0891b2);display:none;">🎲 AUTO</button>
+            </div>
             <button class="abtn ao" id="mNewBtn" onclick="mNewGame()" style="margin-top:6px;display:none;background:var(--purple)">🔄 NEW GAME</button>
             <div class="rdisplay" id="mrm"></div>
           </div>
@@ -3769,7 +3815,7 @@ canvas{display:block;width:100%;height:280px;min-height:280px}
 // ══════════════════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════════════════
-let avBalance   = 50;
+let avBalance   = 50; // will be synced from main bal when page opens
 let avGameState = 'BET'; // BET | PLAYING | GAMEEND
 let avMultiplier= 1.0;
 let crashAt   = newCrash();
@@ -4093,12 +4139,13 @@ function placeBet(idx){
   const b=bets[idx];
   const amt=parseFloat(document.getElementById('input'+idx.toUpperCase()).value)||0;
   if(amt<=0){ showToast('Enter a valid bet amount','info'); return; }
-  if(amt>balance){ showToast('Insufficient avBalance','lose'); return; }
+  if(amt>avBalance){ showToast('Insufficient balance','lose'); return; }
   if(avGameState==='PLAYING'){
     showToast('⏳ Wait for the next round','info'); return;
   }
   b.amount=amt; b.state='pending';
   avBalance-=amt;
+  upBal(-amt); // deduct from main balance
   renderBalance();
   showToast(`✅ Bet ₹${amt.toFixed(2)} placed for next round`,'info');
   updateBtns();
@@ -4109,6 +4156,7 @@ function cashOut(idx, auto){
   if(!b.placed) return;
   const win=b.amount*avMultiplier;
   avBalance+=win;
+  upBal(win); // add to main balance
   renderBalance();
   b.placed=false; b.state='idle';
   myBetsHistory.unshift({mult:avMultiplier.toFixed(2),bet:b.amount,won:win,cashedOut:true});
@@ -4168,6 +4216,7 @@ function switchTab(t, btn){
   renderBoard();
 }
 function renderBalance(){
+  avBalance = bal; // always keep in sync with main balance
   document.getElementById('balance').textContent='₹'+avBalance.toFixed(2);
 }
 function renderPills(){
@@ -5158,6 +5207,8 @@ function goGame(g){
   if(g==='pump'){pumpInit();}
   if(g==='rps'){rpsInit();}
   if(g==='aviator'){
+    avBalance = bal; // sync main balance into aviator
+    renderBalance();
     const intro=document.getElementById('aviator-intro');
     const wrap=document.getElementById('aviator-game-wrap');
     // Reset intro animation
@@ -5865,39 +5916,121 @@ function playCashoutSound() {
 // ─────────────────────────────────────────────────────
 
 // MINES
-let mb2=100,mc2=3,mBoard=[],mRev=0,mActive=false,mBetPlaced=false,mExtraIdxs=new Set();
+const MINE_BOMB_IMG = 'data:image/png;base64,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';
+const MINE_GEM_IMG  = 'data:image/png;base64,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';
 
+let mb2=100, mc2=3, mBoard=[], mRev=0, mActive=false, mBetPlaced=false;
+let mMartingale=false, mOrigBet=100, mMartLosses=0;
+let mSafePath=false, mSafeSelected=[], mSafeRunning=false;
+
+// ── BOMB CHIP SELECTOR ──────────────────────────────────────
+function mInitBombChips(){
+  const wrap = document.getElementById('mBombChips');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  for(let i=1;i<=24;i++){
+    const b=document.createElement('button');
+    b.className='m-bchip'+(i===mc2?' bomb-on':'');
+    b.textContent=i;
+    b.onclick=(function(v){return function(){mSetBombs(v);}})(i);
+    wrap.appendChild(b);
+  }
+}
+
+function mSetBombs(v){
+  if(mActive) return;
+  mc2=v;
+  document.querySelectorAll('.m-bchip').forEach((b,i)=>{
+    b.className='m-bchip'+(i+1===v?' bomb-on':'');
+  });
+  const gemEl=document.getElementById('mGemCount');
+  const bombEl=document.getElementById('mBombCount');
+  if(gemEl) gemEl.textContent=25-mc2;
+  if(bombEl) bombEl.textContent=mc2;
+  umMult();
+}
+
+// ── BET CHIPS ──────────────────────────────────────────────
 function smb(v){
-  if(mActive) return; // can't change bet mid-game
-  mb2=v;
+  if(mActive) return;
+  mb2=v; mOrigBet=v;
   document.getElementById('mbs').value=v;
   document.querySelectorAll('#page-mines .chip').forEach(c=>{
     const cv=c.textContent==='1K'?1000:parseInt(c.textContent);
     c.classList.toggle('on',cv===v);
   });
+  mUpdateMartInfo();
   umMult();
 }
 
-function cmc(d){
-  if(mActive) return; // can't change mines mid-game
-  mc2=Math.max(1,Math.min(24,mc2+d));
-  document.getElementById('mcd').textContent=mc2;
-  const gemCountEl=document.getElementById('mGemCount');
-  const bombCountEl=document.getElementById('mBombCount');
-  if(gemCountEl) gemCountEl.textContent=25-mc2;
-  if(bombCountEl) bombCountEl.textContent=mc2;
-  umMult();
+// ── MARTINGALE ─────────────────────────────────────────────
+function mMartChange(){
+  mMartingale=document.getElementById('mMartToggle').checked;
+  mMartLosses=0;
+  mUpdateMartInfo();
 }
 
-function mGetMult(rev,mines){
-  // Realistic multiplier: 0.99 * C(25,rev) / C(25-mines,rev)
-  if(rev===0) return 1.00;
-  let num=1, den=1;
-  for(let k=0;k<rev;k++){
-    num *= (25-mines-k);
-    den *= (25-k);
+function mUpdateMartInfo(){
+  const el=document.getElementById('mMartInfo');
+  const sym=(typeof CURR!=='undefined')?CURR.symbol:'₹';
+  if(mMartingale){
+    const nextBet = mOrigBet * Math.pow(2, mMartLosses);
+    mb2 = nextBet;
+    el.style.display='block';
+    document.getElementById('mMartNextBet').textContent=sym+fmt(nextBet);
+    // update chips UI
+    document.querySelectorAll('#page-mines .chip').forEach(c=>{
+      const cv=c.textContent==='1K'?1000:parseInt(c.textContent);
+      c.classList.toggle('on',cv===mb2);
+    });
+  } else {
+    el.style.display='none';
+    mb2=mOrigBet;
   }
-  const prob = num/den;
+}
+
+// ── SAFE PATH ──────────────────────────────────────────────
+function mSafeChange(){
+  mSafePath=document.getElementById('mSafeToggle').checked;
+  const ui=document.getElementById('mSafePathUI');
+  ui.style.display=mSafePath?'block':'none';
+  mSafeSelected=[];
+  if(mSafePath) mRenderSafePathCells();
+}
+
+function mRenderSafePathCells(){
+  const wrap=document.getElementById('mSafePathCells');
+  if(!wrap) return;
+  wrap.innerHTML='';
+  for(let i=0;i<25;i++){
+    const b=document.createElement('button');
+    b.className='m-sp-cell'+(mSafeSelected.includes(i)?' picked':'');
+    b.textContent=i+1;
+    b.id='msp'+i;
+    b.onclick=(function(idx){return function(){mToggleSafeCell(idx);}})(i);
+    wrap.appendChild(b);
+  }
+  const cnt=document.getElementById('mSafePickCount');
+  if(cnt) cnt.textContent=mSafeSelected.length+' / 5 selected';
+}
+
+function mToggleSafeCell(idx){
+  if(mActive) return;
+  const pos=mSafeSelected.indexOf(idx);
+  if(pos>-1){ mSafeSelected.splice(pos,1); }
+  else if(mSafeSelected.length<5){ mSafeSelected.push(idx); }
+  mRenderSafePathCells();
+}
+
+// ── MULT CALC ──────────────────────────────────────────────
+function mGetMult(rev,mines){
+  if(rev===0) return 1.00;
+  let num=1,den=1;
+  for(let k=0;k<rev;k++){
+    num*=(25-mines-k);
+    den*=(25-k);
+  }
+  const prob=num/den;
   return parseFloat((0.75/prob).toFixed(2));
 }
 
@@ -5909,56 +6042,100 @@ function umMult(){
   document.getElementById('mmb').textContent='×'+m.toFixed(2);
 }
 
+// ── NEW GAME ───────────────────────────────────────────────
 function mNewGame(){
-  // Reset to ready state
-  mActive=false; mBetPlaced=false; mRev=0;
+  mActive=false; mBetPlaced=false; mRev=0; mSafeRunning=false;
   document.getElementById('mStartBtn').style.display='block';
+  document.getElementById('mAutoBtn').style.display='none';
+  document.getElementById('mActionRow').style.display='flex';
   document.getElementById('mCashBtn').style.display='none';
   document.getElementById('mNewBtn').style.display='none';
   document.getElementById('mrm').style.display='none';
   document.getElementById('mmb').textContent='×1.00';
+  mUpdateMartInfo();
   renderMBoard(false);
   umMult();
 }
 
+// ── INIT ───────────────────────────────────────────────────
 function initMines(){
   if(bal<mb2){toast('Insufficient balance!','loss');return;}
   upBal(-mb2);
   mBetPlaced=true;
 
-  // Place exactly mc2 bombs, no hidden extras
-  mBoard = Array(25).fill('gem');
-  const allIdx = Array.from({length:25},(_,i)=>i).sort(()=>Math.random()-0.5);
+  mBoard=Array(25).fill('gem');
+  const allIdx=Array.from({length:25},(_,i)=>i).sort(()=>Math.random()-0.5);
   for(let i=0;i<mc2;i++) mBoard[allIdx[i]]='bomb';
-  mExtraIdxs = new Set(); // no hidden bombs
 
   mRev=0; mActive=true;
   document.getElementById('mmb').textContent='×1.00';
   document.getElementById('mrm').style.display='none';
-  // Show cashout, hide start/new game
   document.getElementById('mStartBtn').style.display='none';
+  document.getElementById('mAutoBtn').style.display='block';
   document.getElementById('mCashBtn').style.display='block';
   document.getElementById('mCashBtn').disabled=true;
   document.getElementById('mCashBtn').style.opacity='0.5';
   document.getElementById('mNewBtn').style.display='none';
   renderMBoard(false);
   umMult();
+
+  // Safe Path: auto-run selected cells
+  if(mSafePath && mSafeSelected.length>0){
+    mSafeRunning=true;
+    mRunSafePath(0);
+  }
 }
 
+// ── SAFE PATH AUTO REVEAL ──────────────────────────────────
+function mRunSafePath(step){
+  if(!mSafeRunning || !mActive) return;
+  if(step >= mSafeSelected.length){
+    mSafeRunning=false;
+    return;
+  }
+  const idx=mSafeSelected[step];
+  setTimeout(function(){
+    if(!mActive) return;
+    revMine(idx);
+    if(mActive) mRunSafePath(step+1);
+  }, 500);
+}
+
+// ── AUTO PICK ──────────────────────────────────────────────
+function mAutoPick(){
+  if(!mActive) return;
+  // Get all unrevealed cells
+  const cells=document.getElementById('mb').children;
+  const unrevealed=[];
+  for(let i=0;i<25;i++){
+    if(!cells[i].className.includes('rev')) unrevealed.push(i);
+  }
+  if(unrevealed.length===0) return;
+  const pick=unrevealed[Math.floor(Math.random()*unrevealed.length)];
+  // Flash the cell before reveal
+  cells[pick].style.transform='scale(1.15)';
+  cells[pick].style.boxShadow='0 0 16px rgba(0,229,255,0.8)';
+  setTimeout(function(){
+    cells[pick].style.transform='';
+    cells[pick].style.boxShadow='';
+    revMine(pick);
+  }, 200);
+}
+
+// ── BOARD RENDER ───────────────────────────────────────────
 function renderMBoardAfterBomb(clickedIdx){
-  // After bomb hit: show all bombs and gems correctly
   const e=document.getElementById('mb');
   const cells=e.children;
   for(let i=0;i<25;i++){
-    if(cells[i].className.includes('rev')) continue; // already revealed by player, keep as is
+    if(cells[i].className.includes('rev')) continue;
     if(mBoard[i]==='bomb'){
-      cells[i].textContent = '💣';
-      cells[i].className = 'mcell rev rbomb';
+      cells[i].innerHTML=`<img src='${MINE_BOMB_IMG}' style='width:75%;height:75%;object-fit:contain;pointer-events:none;'>`;
+      cells[i].className='mcell rev rbomb';
     } else {
-      cells[i].textContent = '💎';
-      cells[i].className = 'mcell rev rgem';
+      cells[i].innerHTML=`<img src='${MINE_GEM_IMG}' style='width:75%;height:75%;object-fit:contain;pointer-events:none;'>`;
+      cells[i].className='mcell rev rgem';
     }
-    cells[i].onclick = null;
+    cells[i].onclick=null;
   }
 }
 
@@ -5969,7 +6146,7 @@ function renderMBoard(ra){
     const b=document.createElement('button');
     b.className='mcell';
     if(ra){
-      b.textContent=t==='bomb'?'💣':'💎';
+      b.innerHTML=t==='bomb'?`<img src='${MINE_BOMB_IMG}' style='width:75%;height:75%;object-fit:contain;pointer-events:none;'>`:`<img src='${MINE_GEM_IMG}' style='width:75%;height:75%;object-fit:contain;pointer-events:none;'>`;
       b.className='mcell rev '+(t==='bomb'?'rbomb':'rgem');
     }
     b.onclick=()=>revMine(i);
@@ -5977,61 +6154,59 @@ function renderMBoard(ra){
   });
 }
 
+// ── REVEAL ─────────────────────────────────────────────────
 function revMine(i){
-  if(!mActive){
-    toast('Click 🚀 START GAME to begin!','info');
-    return;
-  }
+  if(!mActive){ toast('Click 🚀 START to begin!','info'); return; }
   const c=document.getElementById('mb').children;
   const t=mBoard[i];
   if(c[i].className.includes('rev')) return;
   c[i].className='mcell rev '+(t==='bomb'?'rbomb':'rgem');
-  c[i].textContent=t==='bomb'?'💣':'💎';
+  c[i].innerHTML=t==='bomb'?`<img src='${MINE_BOMB_IMG}' style='width:75%;height:75%;object-fit:contain;pointer-events:none;'>`:`<img src='${MINE_GEM_IMG}' style='width:75%;height:75%;object-fit:contain;pointer-events:none;'>`;
   c[i].onclick=null;
 
   if(t==='bomb'){
     playBombSound();
-    mActive=false;
-    mBetPlaced=false;
-    // Flash the clicked bomb cell with shake animation
-    c[i].style.animation = 'none';
-    c[i].offsetHeight; // force reflow
-    c[i].style.animation = 'bombShake 0.5s ease';
-    c[i].style.fontSize = '28px';
+    mActive=false; mSafeRunning=false; mBetPlaced=false;
+    // Screen shake
+    const arena=document.querySelector('#page-mines .garena');
+    if(arena){ arena.style.animation='none'; arena.offsetHeight; arena.style.animation='screenShake 0.5s ease'; setTimeout(()=>arena.style.animation='',600); }
+    // Red flash
+    c[i].style.animation='bombExplode 0.5s ease';
     setTimeout(()=>renderMBoardAfterBomb(i),500);
     showR('mrm','💣 BOOM! −'+((typeof CURR!=='undefined')?CURR.symbol:'₹')+fmt(mb2),'loss');
     toast('💣 BOOM! Lost '+((typeof CURR!=='undefined')?CURR.symbol:'₹')+fmt(mb2),'loss');
     addHist('Mines',mb2,false,'💣');
     document.getElementById('mCashBtn').style.display='none';
-    document.getElementById('mStartBtn').style.display='none';
+    document.getElementById('mAutoBtn').style.display='none';
+    document.getElementById('mActionRow').style.display='none';
     document.getElementById('mNewBtn').style.display='block';
+    // Martingale: loss → double next bet
+    if(mMartingale){
+      mMartLosses++;
+      mUpdateMartInfo();
+    }
   } else {
     playGemSound();
     mRev++;
     umMult();
-    // Unlock cash out after first gem
     document.getElementById('mCashBtn').disabled=false;
     document.getElementById('mCashBtn').style.opacity='1';
-    // Flash multiplier
     const mm=document.getElementById('mmb');
     mm.style.transform='scale(1.3)';
     mm.style.color='var(--gold)';
     setTimeout(()=>{mm.style.transform='';mm.style.color='var(--green)';},300);
-    // Auto cashout if all safe gems found
-    if(mRev===25-mc2){
-      setTimeout(mco,400);
-    }
+    if(mRev===25-mc2){ setTimeout(mco,400); }
   }
 }
 
+// ── CASH OUT ───────────────────────────────────────────────
 function mco(){
   if(mRev===0){toast('Reveal at least one gem first!','info');return;}
   if(!mActive)return;
   const m=mGetMult(mRev,mc2);
   const payout=mb2*m;
   const profit=payout-mb2;
-  mActive=false;
-  mBetPlaced=false;
+  mActive=false; mBetPlaced=false; mSafeRunning=false;
   upBal(payout);
   playCashoutSound();
   const sym=(typeof CURR!=='undefined')?CURR.symbol:'₹';
@@ -6039,15 +6214,37 @@ function mco(){
   toast('💎 Cashed out! +'+sym+fmt(profit),'win');
   addHist('Mines',profit,true,'💣');
   document.getElementById('mCashBtn').style.display='none';
-  document.getElementById('mStartBtn').style.display='none';
+  document.getElementById('mAutoBtn').style.display='none';
+  document.getElementById('mActionRow').style.display='none';
   document.getElementById('mNewBtn').style.display='block';
   document.querySelector('#page-mines .abtn.ag').disabled=true;
+  // Martingale: win → reset
+  if(mMartingale){
+    mMartLosses=0;
+    mUpdateMartInfo();
+  }
   setTimeout(()=>renderMBoard(true),200);
   setTimeout(()=>{
     renderMBoard(false);
     document.getElementById('mrm').style.display='none';
+    document.getElementById('mActionRow').style.display='flex';
+    document.getElementById('mStartBtn').style.display='block';
   },2500);
 }
+
+// ── INIT on page load ──────────────────────────────────────
+(function mBootstrap(){
+  // Wait for DOM
+  const tryInit=function(){
+    if(document.getElementById('mBombChips')){
+      mInitBombChips();
+    } else {
+      setTimeout(tryInit,200);
+    }
+  };
+  setTimeout(tryInit,300);
+})();
+
 
 // ════════════════════════════════════════════════════════════
 //  PROFESSIONAL EUROPEAN ROULETTE ENGINE
@@ -9524,14 +9721,15 @@ function slotInit() {
     var inner = document.getElementById('slotInner' + r);
     if(!inner) continue;
     inner.innerHTML = '';
-    // Add 20 symbols to each reel
+    inner.style.transition = 'none';
+    // 20 symbols, index 9 is center
     for(var i = 0; i < 20; i++) {
       var sym = document.createElement('div');
       sym.className = 'reel-sym';
       sym.textContent = SLOT_SYMS[Math.floor(Math.random() * SLOT_SYMS.length)];
       inner.appendChild(sym);
     }
-    // Position to middle
+    // Position so index 9 is centered in the 90px reel window
     inner.style.transform = 'translateY(-' + (9 * 90) + 'px)';
   }
 }
@@ -9564,11 +9762,11 @@ function slotSpin() {
   document.getElementById('slotSpinBtn').disabled = true;
   document.getElementById('slotSpinBtn').textContent = '🌀 Spinning...';
   document.getElementById('slotResult').style.display = 'none';
+  // Clear win lines
+  for(var wli=0;wli<3;wli++){var wle=document.getElementById('slotWinLine'+wli);if(wle)wle.classList.remove('show');}
 
   // Pre-determine results
   var results = [slotWeightedRandom(), slotWeightedRandom(), slotWeightedRandom()];
-
-  // Animate each reel with staggered stop
   var completed = 0;
 
   function animateReel(reelIdx, stopSym, delay, duration) {
@@ -9576,53 +9774,46 @@ function slotSpin() {
       var inner = document.getElementById('slotInner' + reelIdx);
       if(!inner) return;
 
-      // Fast spin
-      var spinInterval;
-      var elapsed = 0;
-      var speedMs = 50;
+      // Build a fresh reel strip: random symbols + land on stopSym at index 9
+      inner.innerHTML = '';
+      for(var i = 0; i < 20; i++) {
+        var sym = document.createElement('div');
+        sym.className = 'reel-sym';
+        sym.textContent = (i === 9) ? stopSym : SLOT_SYMS[Math.floor(Math.random() * SLOT_SYMS.length)];
+        inner.appendChild(sym);
+      }
 
-      spinInterval = setInterval(function() {
-        elapsed += speedMs;
-        // Change random symbols during spin
-        var syms = inner.querySelectorAll('.reel-sym');
-        syms.forEach(function(s) {
-          if(Math.random() > 0.7) {
-            s.textContent = SLOT_SYMS[Math.floor(Math.random() * SLOT_SYMS.length)];
-          }
-        });
+      // Start far above (index 0), scroll down to index 9 center
+      var SYM_H = 90;
+      var centerOffset = 9 * SYM_H; // translateY to show index 9 in center
 
-        if(elapsed >= duration) {
-          clearInterval(spinInterval);
-          // Reset transition and transform first
-          inner.style.transition = 'none';
-          inner.style.transform = 'translateY(-' + (9 * 90) + 'px)';
-          // Set final symbol in middle
-          var midSym = inner.querySelectorAll('.reel-sym')[9];
-          if(midSym) midSym.textContent = stopSym;
-          // Freeze other symbols too
-          inner.querySelectorAll('.reel-sym').forEach(function(s, i) {
-            if(i !== 9) s.textContent = SLOT_SYMS[Math.floor(Math.random() * SLOT_SYMS.length)];
-          });
+      // Snap to top instantly (no transition)
+      inner.style.transition = 'none';
+      inner.style.transform = 'translateY(0px)';
 
-          // Reel stop bounce animation
-          setTimeout(function() {
-            inner.style.transition = 'transform 0.15s cubic-bezier(.2,1.5,.5,1)';
-            inner.style.transform = 'translateY(-' + ((9 * 90) - 4) + 'px)';
-            setTimeout(function() {
-              inner.style.transform = 'translateY(-' + (9 * 90) + 'px)';
-            }, 150);
-          }, 10);
+      // Force reflow then animate scroll down to center
+      inner.offsetHeight; // reflow
+      inner.style.transition = 'transform ' + (duration/1000).toFixed(2) + 's cubic-bezier(0.25,0.1,0.25,1)';
+      inner.style.transform = 'translateY(-' + centerOffset + 'px)';
 
+      // After scroll done, bounce effect
+      setTimeout(function() {
+        inner.style.transition = 'transform 0.12s cubic-bezier(.2,1.6,.5,1)';
+        inner.style.transform = 'translateY(-' + (centerOffset - 6) + 'px)';
+        setTimeout(function() {
+          inner.style.transition = 'transform 0.1s ease';
+          inner.style.transform = 'translateY(-' + centerOffset + 'px)';
           completed++;
           if(completed === 3) slotShowResult(results, bet);
-        }
-      }, speedMs);
+        }, 120);
+      }, duration);
+
     }, delay);
   }
 
-  animateReel(0, results[0], 0, 800);
-  animateReel(1, results[1], 300, 1100);
-  animateReel(2, results[2], 600, 1400);
+  animateReel(0, results[0], 0,   700);
+  animateReel(1, results[1], 200, 900);
+  animateReel(2, results[2], 400, 1100);
 }
 
 function slotShowResult(results, bet) {
@@ -9682,22 +9873,15 @@ function slotShowResult(results, bet) {
     }).join('');
   }
 
-  // Re-enable spin
+  // Re-enable spin + rebuild reels for next round
   slotSpinning = false;
   document.getElementById('slotSpinBtn').disabled = false;
   document.getElementById('slotSpinBtn').textContent = '🎰 SPIN';
 
-  // Re-init reel symbols for next spin
+  // Rebuild reel strips fresh so next spin starts clean
   setTimeout(function() {
-    for(var r = 0; r < 3; r++) {
-      var inner = document.getElementById('slotInner' + r);
-      if(!inner) continue;
-      inner.style.transition = 'none';
-      inner.querySelectorAll('.reel-sym').forEach(function(s, i) {
-        if(i !== 9) s.textContent = SLOT_SYMS[Math.floor(Math.random() * SLOT_SYMS.length)];
-      });
-    }
-  }, 500);
+    slotInit();
+  }, 600);
 }
 
 // Init slot when page opens
@@ -9742,6 +9926,7 @@ window.scrollTo(0,0);
 
   // The 9 box types (shuffled every game)
   var BP_MAX_PICKS = 3;
+  var bpPickedDecoyIdx = -1; // tracks which box the user picked that was a decoy (jackpot trap)
   // ₹500 & ₹1000 are DECOY boxes — shown on front but internally swapped to butter when picked
   var BP_BOXES = [
     { type:'money',  dispAmt:'₹50',    dispColor:'#f59e0b', val:50,  real:true  },
@@ -9750,8 +9935,8 @@ window.scrollTo(0,0);
     { type:'butter', dispAmt:'LUCK',   dispColor:'#f59e0b', val:0,   real:true  },
     { type:'boom',   dispAmt:'BOOM',   dispColor:'#ef4444', val:0,   real:true  },
     { type:'butter', dispAmt:'LUCK',   dispColor:'#f59e0b', val:0,   real:true  },
-    { type:'decoy',  dispAmt:'₹500',   dispColor:'#60a5fa', val:0,   real:false },
-    { type:'decoy',  dispAmt:'₹1,000', dispColor:'#ffd600', val:0,   real:false },
+    { type:'money',  dispAmt:'₹65',    dispColor:'#22c55e', val:65,  real:true  },
+    { type:'money',  dispAmt:'₹20',    dispColor:'#60a5fa', val:20,  real:true  },
     { type:'random', dispAmt:'₹?',     dispColor:'#a855f7', val:0,   real:true  },
   ];
 
@@ -9863,6 +10048,7 @@ window.scrollTo(0,0);
     bpActive = true;
     bpCollected = 0;
     bpOpenedCount = 0;
+    bpPickedDecoyIdx = -1;
 
     bpBuildGrid();
 
@@ -9901,8 +10087,12 @@ window.scrollTo(0,0);
       content = { type:'money', dispAmt:'', dispColor:'#a855f7', val: Math.floor(Math.random()*200)+1, real:true };
       content.dispAmt = '+₹'+content.val;
     }
-    // For decoy: save display version, then swap to butter for logic AFTER back face built
+    // For decoy: treat as BOOM immediately — save picked index so end-reveal shows jackpot on a DIFFERENT box
     var isDecoy = (content.type === 'decoy');
+    if (isDecoy) {
+      bpPickedDecoyIdx = idx; // remember which box user picked (so we show jackpot elsewhere at end)
+      content = { type:'boom', dispAmt:'BOOM', dispColor:'#ef4444', val:0, real:true };
+    }
 
     // Build back face content
     var back = document.getElementById('bpBoxBack'+idx);
@@ -9913,27 +10103,12 @@ window.scrollTo(0,0);
       } else if (content.type === 'butter') {
         back.className = 'bp-box-back bp-butter-back';
         back.innerHTML = '<div class="bp-back-svg" style="width:44px;height:44px;border-radius:50%;background:rgba(245,158,11,0.12);border:1.5px solid rgba(245,158,11,0.35);display:flex;align-items:center;justify-content:center;margin-bottom:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 3C10 3 7 5 7 9c0 3 2 5 3 6H14c1-1 3-3 3-6 0-4-3-6-5-6z" fill="#f59e0b" opacity="0.8"/><rect x="8" y="15" width="8" height="3" rx="1.5" fill="#f59e0b" opacity="0.6"/><rect x="9" y="18" width="6" height="2" rx="1" fill="#f59e0b" opacity="0.4"/></svg></div><div class="bp-back-label" style="color:#f59e0b;font-size:10px;line-height:1.3;">BETTER<br>LUCK!</div>';
-      } else if (isDecoy) {
-        // Show ₹500/₹1000 jackpot style — teaser!
-        var dAmt = content.dispAmt;
-        back.className = 'bp-box-back';
-        back.style.background = 'linear-gradient(160deg,#1a1200,#2a1e00)';
-        back.style.border = '1.5px solid #ffd600';
-        back.style.boxShadow = '0 0 24px rgba(255,214,0,0.4),inset 0 0 16px rgba(255,214,0,0.07)';
-        back.innerHTML = '<div style="width:44px;height:44px;border-radius:50%;background:rgba(255,214,0,0.15);border:1.5px solid rgba(255,214,0,0.5);display:flex;align-items:center;justify-content:center;margin-bottom:8px;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><polygon points="12,2 15,9 22,9 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9 9,9" fill="#ffd600" opacity="0.9"/></svg></div>'
-          +'<div style="font-family:Orbitron,sans-serif;font-size:12px;font-weight:900;color:#ffd600;letter-spacing:1px;">'+dAmt+'</div>'
-          +'<div style="font-size:8px;color:rgba(255,214,0,0.5);letter-spacing:2px;margin-top:3px;text-transform:uppercase;">Jackpot</div>';
       } else {
         var c2 = content.dispColor || '#22c55e';
         back.className = 'bp-box-back bp-win-back';
         back.innerHTML = '<div class="bp-back-svg" style="width:44px;height:44px;border-radius:50%;background:rgba(34,197,94,0.1);border:1.5px solid '+c2+'44;display:flex;align-items:center;justify-content:center;margin-bottom:8px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="'+c2+'" stroke-width="1.5" opacity="0.6"/><path d="M8 12l3 3 5-5" stroke="'+c2+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
           +'<div class="bp-back-label" style="color:'+c2+';font-size:13px;font-family:Orbitron,sans-serif;">'+content.dispAmt+'</div>';
       }
-    }
-
-    // Swap decoy to butter NOW (after back face already built with jackpot display)
-    if (isDecoy) {
-      content = { type:'butter', dispAmt:'LUCK', dispColor:'#f59e0b', val:0, real:true };
     }
 
     // Animate box reveal (flip) — already added bp-opened above, just handle result
@@ -9966,6 +10141,19 @@ window.scrollTo(0,0);
   function bpEndGame(safe) {
     bpActive = false;
 
+    // Pick 2 random unopened boxes to show as fake jackpots in reveal
+    var unopened = [];
+    for (var j = 0; j < 9; j++) {
+      var bxj = document.getElementById('bpBox'+j);
+      if (bxj && !bxj.classList.contains('bp-opened')) unopened.push(j);
+    }
+    // Shuffle unopened and pick first 2 for fake jackpot display
+    for (var s = unopened.length - 1; s > 0; s--) {
+      var r = Math.floor(Math.random() * (s + 1));
+      var tmp = unopened[s]; unopened[s] = unopened[r]; unopened[r] = tmp;
+    }
+    var fakeJackpotIdxs = [unopened[0], unopened[1] !== undefined ? unopened[1] : -1];
+
     // Reveal remaining boxes with delay
     for (var i = 0; i < 9; i++) {
       (function(idx) {
@@ -9977,7 +10165,21 @@ window.scrollTo(0,0);
           if (c.type === 'random') c = { type:'random', val: Math.floor(Math.random()*200)+1 };
           var bk = document.getElementById('bpBoxBack'+idx);
           if (bk) {
-            if (c.type==='boom') { bk.className='bp-box-back bp-bomb-back'; bk.innerHTML='<div class="bp-back-icon" style="background:rgba(239,68,68,0.2);color:#ef4444;font-size:26px;">💣</div><div class="bp-back-label" style="color:#ef4444;">BOOM!</div>'; }
+            // Show fake jackpot on 2 designated reveal slots
+            if (fakeJackpotIdxs.indexOf(idx) !== -1) {
+              var jackpotAmts = ['₹500','₹1,000'];
+              var jAmt = jackpotAmts[fakeJackpotIdxs.indexOf(idx)];
+              bk.className='bp-box-back';
+              bk.style.background='linear-gradient(160deg,#1a1200,#2a1e00)';
+              bk.style.border='1.5px solid #ffd600';
+              bk.style.boxShadow='0 0 20px rgba(255,214,0,0.3)';
+              bk.innerHTML='<div style="font-size:22px;margin-bottom:4px;">👑</div>'
+                +'<div style="font-family:Orbitron,sans-serif;font-size:11px;font-weight:900;color:#ffd600;">'+jAmt+'</div>'
+                +'<div style="font-size:8px;color:rgba(255,214,0,0.5);letter-spacing:2px;margin-top:2px;">JACKPOT</div>';
+            }
+            // All decoy boxes (including picked one) show as BOOM in reveal — never jackpot
+            else if (c.type==='decoy') { bk.className='bp-box-back bp-bomb-back'; bk.innerHTML='<div class="bp-back-icon" style="background:rgba(239,68,68,0.2);color:#ef4444;font-size:26px;">💣</div><div class="bp-back-label" style="color:#ef4444;">BOOM!</div>'; }
+            else if (c.type==='boom') { bk.className='bp-box-back bp-bomb-back'; bk.innerHTML='<div class="bp-back-icon" style="background:rgba(239,68,68,0.2);color:#ef4444;font-size:26px;">💣</div><div class="bp-back-label" style="color:#ef4444;">BOOM!</div>'; }
             else if (c.type==='butter') { bk.className='bp-box-back bp-butter-back'; bk.innerHTML='<div class="bp-back-icon" style="background:rgba(245,158,11,0.2);color:#f59e0b;font-size:24px;">🤞</div><div class="bp-back-label" style="color:#f59e0b;">BETTER<br>LUCK!</div>'; }
             else if (c.type==='jackpot') { bk.className='bp-box-back bp-win-back'; bk.innerHTML='<div class="bp-back-icon" style="background:rgba(255,214,0,0.2);color:#ffd600;font-size:22px;">👑</div><div class="bp-back-label" style="color:#ffd600;">+₹1,000</div>'; }
             else { var cv2=c.val>=500?'#60a5fa':c.val>=50?'#f59e0b':'#22c55e'; bk.className='bp-box-back bp-win-back'; bk.innerHTML='<div class="bp-back-icon" style="background:rgba(34,197,94,0.15);color:'+cv2+';font-size:15px;font-family:Orbitron,sans-serif;font-weight:900;">+₹'+c.val+'</div>'; }
