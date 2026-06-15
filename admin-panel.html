@@ -174,7 +174,6 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
       <div class="nav-pill" onclick="showPage('deposits',this)">Deposits</div>
       <div class="nav-pill" onclick="showPage('withdrawals',this)">Withdrawals</div>
       <div class="nav-pill" onclick="showPage('users',this)">Users</div>
-      <div class="nav-pill" onclick="showPage('sportsbets',this)">⚽ Sports Bets</div>
     </div>
     <div class="status-dot" id="status-dot"></div>
     <button class="refresh-btn" onclick="loadAll()">↻</button>
@@ -222,17 +221,7 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tex
     <input class="search-bar" type="text" placeholder="🔍 Search by name or email..." id="user-search" oninput="filterUsers(this.value)">
     <div id="users-list"></div>
   </div>
-
-  <!-- SPORTS BETS -->
-  <div class="page" id="page-sportsbets">
-    <div class="tabs">
-      <div class="tab active" onclick="setSbTab('pending',this)">⏳ Pending</div>
-      <div class="tab" onclick="setSbTab('win',this)">🏆 Win</div>
-      <div class="tab" onclick="setSbTab('loss',this)">❌ Loss</div>
-      <div class="tab" onclick="setSbTab('all',this)">All</div>
-    </div>
-    <div id="sportsbets-list"></div>
-  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════
@@ -288,10 +277,8 @@ function doLogin() {
 let allDeposits = [];
 let allWithdrawals = [];
 let allUsers = [];
-let allSportsBets = [];
 let depTab = 'pending';
 let wdTab = 'pending';
-let sbTab = 'pending';
 
 // ═══════════════════════════════════════════
 //  LOAD ALL DATA from Supabase
@@ -299,16 +286,14 @@ let sbTab = 'pending';
 async function loadAll() {
   setStatus(false);
   try {
-    const [deps, wds, users, sbets] = await Promise.all([
+    const [deps, wds, users] = await Promise.all([
       sbFetch('/rest/v1/deposits?select=*,users(name,email,balance)&order=created_at.desc'),
       sbFetch('/rest/v1/withdrawals?select=*,users(name,email,balance)&order=created_at.desc'),
-      sbFetch('/rest/v1/users?select=*&order=created_at.desc'),
-      sbFetch('/rest/v1/sports_bets?select=*,users(name,email)&order=created_at.desc')
+      sbFetch('/rest/v1/users?select=*&order=created_at.desc')
     ]);
-    allDeposits    = deps   || [];
-    allWithdrawals = wds    || [];
-    allUsers       = users  || [];
-    allSportsBets  = sbets  || [];
+    allDeposits    = deps  || [];
+    allWithdrawals = wds   || [];
+    allUsers       = users || [];
     renderAll();
     setStatus(true);
     toast('Data loaded ✓', 'success');
@@ -331,7 +316,6 @@ function renderAll() {
   renderDeposits();
   renderWithdrawals();
   renderUsers();
-  renderSportsBets();
 }
 
 function renderDashboard() {
@@ -471,77 +455,7 @@ function renderUsers(search = '') {
 }
 function filterUsers(q) { renderUsers(q); }
 
-// ── Sports Bets ──
-function setSbTab(t, el) {
-  sbTab = t;
-  document.querySelectorAll('#page-sportsbets .tab').forEach(e => e.classList.remove('active'));
-  el.classList.add('active');
-  renderSportsBets();
-}
-function renderSportsBets() {
-  const list = sbTab === 'all' ? allSportsBets : allSportsBets.filter(b => b.status === sbTab);
-  const el = document.getElementById('sportsbets-list');
-  if (!list.length) { el.innerHTML = `<div class="empty"><div class="ico">⚽</div>No ${sbTab} bets</div>`; return; }
-  el.innerHTML = list.map(b => sportsBetCard(b)).join('');
-}
-function sportsBetCard(b) {
-  const name  = (b.users && b.users.name)  || 'Unknown';
-  const email = (b.users && b.users.email) || '';
-  const isPend = b.status === 'pending';
-  const sc = b.status === 'win' ? 'green' : b.status === 'loss' ? 'red' : 'orange';
-  const when = timeAgo(b.created_at);
-  return `<div class="card" id="sb-${b.id}">
-    <div class="card-body">
-      <div class="card-top">
-        <div>
-          <div class="card-name">${esc(name)}</div>
-          <div class="card-email">${esc(email)}</div>
-        </div>
-        <div class="card-amount">₹${fmt(b.bet_amount)}</div>
-      </div>
-      <div class="card-meta">
-        <span class="meta-chip ${sc}">${b.status.toUpperCase()}</span>
-        <span class="meta-chip">⚽ ${esc(b.match_name)}</span>
-        <span class="meta-chip">Pick: ${esc(b.team_selected)}</span>
-        <span class="meta-chip">Odds: ${b.odds}x</span>
-        <span class="meta-chip">Win: ₹${fmt(b.potential_win)}</span>
-        <span class="meta-chip">${when}</span>
-      </div>
-    </div>
-    ${isPend ? `<div class="card-actions">
-      <button class="btn btn-approve" onclick="sbSetResult('${b.id}','${b.user_id}',${b.potential_win},'win')">🏆 Win</button>
-      <button class="btn btn-reject" onclick="sbSetResult('${b.id}','${b.user_id}',0,'loss')">❌ Loss</button>
-    </div>` : ''}
-  </div>`;
-}
-async function sbSetResult(betId, userId, potWin, result) {
-  const el = document.getElementById('sb-' + betId);
-  if (el) { el.style.opacity = '0.5'; el.style.pointerEvents = 'none'; }
-  try {
-    // Update bet status
-    await sbFetch(`/rest/v1/sports_bets?id=eq.${betId}`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: result })
-    });
-    // If win, add winnings to user balance
-    if (result === 'win' && potWin > 0) {
-      const rows = await sbFetch(`/rest/v1/users?id=eq.${userId}&select=balance`);
-      if (rows && rows[0]) {
-        const newBal = parseFloat(rows[0].balance || 0) + parseFloat(potWin);
-        await sbFetch(`/rest/v1/users?id=eq.${userId}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ balance: parseFloat(newBal.toFixed(2)) })
-        });
-      }
-    }
-    toast(result === 'win' ? `🏆 Win! ₹${fmt(potWin)} added` : '❌ Loss marked', 'success');
-    await loadAll();
-  } catch(e) {
-    toast('Error: ' + e.message, 'error');
-    if (el) { el.style.opacity = '1'; el.style.pointerEvents = ''; }
-  }
-}
-
+function userCard(u) {
   const id = u.id;
   const initial = (u.name || u.email || '?')[0].toUpperCase();
   const isBanned = u.status === 'banned';
